@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Predictor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 900px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .header-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Content Section */
+        .content {
+            padding: 40px;
+        }
+
+        /* Form Grid Layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Form Groups */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        /* Input Fields */
+        .form-group input {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:hover {
+            border-color: #cbd5e0;
+        }
+
+        /* Hint Text */
+        .hint {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        /* Predict Button */
+        .predict-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+
+        .predict-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Result Container */
+        .result-container {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Result States */
+        .result-container.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .result-container.warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .result-container.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        /* Result Elements */
+        .result-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Info Banner */
+        .info-banner {
+            background: #e6f2ff;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .info-banner p {
+            color: #2d3748;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header-icon {
+                font-size: 40px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header p {
+                font-size: 14px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h1>Heart Disease Risk Predictor</h1>
+            <p>Advanced AI-powered cardiovascular risk assessment</p>
+        </div>
+
+        <div class="content">
+            <div class="info-banner">
+                <p><i class="fas fa-info-circle"></i> <strong>Note:</strong> Please fill in all fields accurately. This tool uses machine learning to assess heart disease risk based on clinical parameters.</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Age</label>
+                    <input type="number" id="age" placeholder="Enter age (years)">
+                    <span class="hint">Patient's age in years</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-venus-mars"></i> Sex</label>
+                    <input type="number" id="sex" placeholder="1 = Male, 0 = Female" min="0" max="1">
+                    <span class="hint">1 = Male, 0 = Female</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-hand-holding-heart"></i> Chest Pain Type</label>
+                    <input type="number" id="cp" placeholder="0-3" min="0" max="3">
+                    <span class="hint">0: Typical, 1: Atypical, 2: Non-anginal, 3: Asymptomatic</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-heartbeat"></i> Resting Blood Pressure</label>
+                    <input type="number" id="trestbps" placeholder="mmHg">
+                    <span class="hint">Resting BP in mmHg</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-vial"></i> Cholesterol</label>
+                    <input type="number" id="chol" placeholder="mg/dl">
+                    <span class="hint">Serum cholesterol in mg/dl</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-candy-cane"></i> Fasting Blood Sugar</label>
+                    <input type="number" id="fbs" placeholder="1 or 0" min="0" max="1">
+                    <span class="hint">1 if > 120 mg/dl, else 0</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-wave-square"></i> Resting ECG</label>
+                    <input type="number" id="restecg" placeholder="0-2" min="0" max="2">
+                    <span class="hint">0: Normal, 1: ST-T abnormality, 2: Hypertrophy</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-running"></i> Max Heart Rate</label>
+                    <input type="number" id="thalach" placeholder="bpm">
+                    <span class="hint">Maximum heart rate achieved</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-dumbbell"></i> Exercise Induced Angina</label>
+                    <input type="number" id="exang" placeholder="1 or 0" min="0" max="1">
+                    <span class="hint">1 = Yes, 0 = No</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-chart-line"></i> ST Depression (Oldpeak)</label>
+                    <input type="number" id="oldpeak" placeholder="0.0" step="0.1">
+                    <span class="hint">ST depression induced by exercise</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-angle-double-up"></i> Slope</label>
+                    <input type="number" id="slope" placeholder="0-2" min="0" max="2">
+                    <span class="hint">0: Upsloping, 1: Flat, 2: Downsloping</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-microscope"></i> CA (Major Vessels)</label>
+                    <input type="number" id="ca" placeholder="0-4" min="0" max="4">
+                    <span class="hint">Number of major vessels (0-4)</span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-heart-pulse"></i> Thalassemia</label>
+                    <input type="number" id="thal" placeholder="1-3" min="1" max="3">
+                    <span class="hint">1: Normal, 2: Fixed defect, 3: Reversible defect</span>
+                </div>
+            </div>
+
+            <button class="predict-btn" onclick="predict()">
+                <i class="fas fa-stethoscope"></i>
+                Analyze Heart Disease Risk
+            </button>
+
+            <div id="result" class="result-container"></div>
+        </div>
+    </div>
+
+    <script>
+        function predict() {
+            const btn = document.querySelector('.predict-btn');
+            const resultDiv = document.getElementById('result');
+            
+            // Validate inputs
+            const inputs = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'];
+            for (let id of inputs) {
+                if (!document.getElementById(id).value) {
+                    showResult('error', 'Please fill in all fields', 'All parameters are required for accurate prediction');
+                    return;
+                }
+            }
+
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            resultDiv.style.display = 'none';
+
+            const payload = {
+                age: parseInt(document.getElementById("age").value),
+                sex: parseInt(document.getElementById("sex").value),
+                cp: parseInt(document.getElementById("cp").value),
+                trestbps: parseInt(document.getElementById("trestbps").value),
+                chol: parseInt(document.getElementById("chol").value),
+                fbs: parseInt(document.getElementById("fbs").value),
+                restecg: parseInt(document.getElementById("restecg").value),
+                thalach: parseInt(document.getElementById("thalach").value),
+                exang: parseInt(document.getElementById("exang").value),
+                oldpeak: parseFloat(document.getElementById("oldpeak").value),
+                slope: parseInt(document.getElementById("slope").value),
+                ca: parseInt(document.getElementById("ca").value),
+                thal: parseInt(document.getElementById("thal").value)
+            };
+
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-stethoscope"></i> Analyze Heart Disease Risk';
+                
+                const result = data.result.toLowerCase();
+                
+                // Detect risk level and assign colors
+                // Red for high risk, Yellow for moderate risk, Green for low risk
+                if (result.includes('high risk') || result.includes('high-risk')) {
+                    showResult('error', 'High Risk Detected', data.result);
+                } else if (result.includes('moderate risk') || result.includes('moderate-risk') || result.includes('medium risk')) {
+                    showResult('warning', 'Moderate Risk Detected', data.result);
+                } else if (result.includes('low risk') || result.includes('low-risk') || result.includes('no disease') || result.includes('healthy')) {
+                    showResult('success', 'Low Risk Assessment', data.result);
+                } else if (result.includes('disease') || result.includes('positive')) {
+                    showResult('error', 'Heart Disease Risk Detected', data.result);
+                } else {
+                    showResult('success', 'Assessment Complete', data.result);
+                }
+            })
+            .catch(err => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-stethoscope"></i> Analyze Heart Disease Risk';
+                showResult('error', 'Connection Error', 'Unable to connect to prediction service. Please ensure the backend is running.');
+            });
+        }
+
+        function showResult(type, title, message) {
+            const resultDiv = document.getElementById('result');
+            const icons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+            
+            resultDiv.className = `result-container ${type}`;
+            resultDiv.innerHTML = `
+                <div class="result-icon"><i class="fas ${icons[type]}"></i></div>
+                <div class="result-text">${title}</div>
+                <div class="result-subtitle">${message}</div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
